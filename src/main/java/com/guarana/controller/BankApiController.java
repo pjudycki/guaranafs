@@ -38,9 +38,9 @@ public class BankApiController {
 
     @GetMapping("/generateExcelReport")
     @ResponseBody
-    public ResponseEntity generateExcelReport() {
+    public ResponseEntity generateExcelReport(@RequestParam String base) {
         try {
-            service.generateExcelReport("currencies", "EUR");
+            service.generateExcelReport("currencies", base);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return ResponseEntity.internalServerError().build();

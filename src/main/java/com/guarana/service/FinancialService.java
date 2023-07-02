@@ -1,5 +1,6 @@
 package com.guarana.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guarana.configuration.GuaranaConfigurationProperties;
@@ -16,12 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Iterator;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -81,15 +81,13 @@ public class FinancialService {
     public void generateExcelReport(String fileName, String base) throws IOException {
         XSSFWorkbook guaranaFsWorkbook = new XSSFWorkbook();
         XSSFSheet currenciesSheet = guaranaFsWorkbook.createSheet(CURR_SHEET_NAME);
-        String allValues = retrieveAll();
-
-        JsonNode treeNode = mapper.readTree(allValues);
-        Iterator<String> fields = treeNode.path("rates").fieldNames();
+        String allRates = retrieveAll();
+        Map<String, Double> currToRateOfExchange = getRatesForBase(allRates, base);
 
         int rCounter = 0;
         int cCounter = 0;
 
-        FileOutputStream fos = new FileOutputStream(createFileName(fileName));
+        FileOutputStream fos = new FileOutputStream(createFileName(fileName + "_" + base));
         Row firstRow = currenciesSheet.createRow(rCounter++);
 
         Cell firstCell = firstRow.createCell(cCounter);
@@ -104,10 +102,12 @@ public class FinancialService {
         Cell thirdCell = secondRow.createCell(cCounter++);
         thirdCell.setCellValue(snapshotDate.toString());
         cCounter = 0;
+
+        Iterator<String> fields = currToRateOfExchange.keySet().iterator();
         try {
             while (fields.hasNext()) {
                 String name = fields.next();
-                Double value = treeNode.findPath(name).doubleValue();
+                Double value = currToRateOfExchange.get(name);
                 Row row = currenciesSheet.createRow(rCounter++);
                 addValuesToRow(name, value, row, cCounter, base);
             }
@@ -120,8 +120,35 @@ public class FinancialService {
         }
     }
 
+    private Map<String, Double> getRatesForBase(String allRates, String currency) throws JsonProcessingException {
+        Map<String, Double> result = new TreeMap<>();
+        JsonNode treeNode = mapper.readTree(allRates);
+        Iterator<String> fields = treeNode.path("rates").fieldNames();
+
+        while (fields.hasNext()) {
+            String name = fields.next();
+            result.put(name, treeNode.findPath(name).doubleValue());
+        }
+
+        convertToCurrency(result, currency);
+
+        return result;
+    }
+
+    private void convertToCurrency(Map<String, Double> result, String currency) {
+
+        Double rateOfExchange = result.get(currency);
+
+        for (Map.Entry<String, Double> entry : result.entrySet()) {
+            String name = entry.getKey();
+            Double value = entry.getValue();
+            Double converted = value / rateOfExchange;
+            result.put(name, converted);
+        }
+    }
+
     private String createFileName(String fileName) {
-        return fileName + LocalDate.now() + ".xlsx";
+        return fileName + "_" + LocalDate.now() + ".xlsx";
     }
 
     private void addValuesToRow(String name, Double value, Row row, int cCounter, String base) {
