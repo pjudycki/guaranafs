@@ -78,7 +78,7 @@ public class FinancialService {
         return response.getBody();
     }
 
-    public void generateExcelReport(String fileName, String base) throws IOException {
+    public String generateExcelReport(String fileName, String base) throws IOException {
         XSSFWorkbook guaranaFsWorkbook = new XSSFWorkbook();
         XSSFSheet currenciesSheet = guaranaFsWorkbook.createSheet(CURR_SHEET_NAME);
         String allRates = retrieveAll();
@@ -118,6 +118,7 @@ public class FinancialService {
             fos.flush();
             fos.close();
         }
+        return fileName;
     }
 
     private Map<String, Double> getRatesForBase(String allRates, String currency) throws JsonProcessingException {
