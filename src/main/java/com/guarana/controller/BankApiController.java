@@ -40,6 +40,14 @@ public class BankApiController {
         return service.retrieveWithBaseAndList(base, symbols);
     }
 
+    @GetMapping("/retrieveWithBaseAndListAndDate")
+    @ResponseBody
+    public String retrieveWithBaseAndCurrenciesListAndDate(@RequestParam String base,
+                                                           @RequestParam String symbols,
+                                                           @RequestParam String date) {
+        return service.retrieveWithBaseAndListAndDate(base, symbols, date);
+    }
+
     @GetMapping("/generateExcelReport")
     @ResponseBody
     public ResponseEntity generateExcelReport(@RequestParam String base) throws FileNotFoundException {
@@ -53,6 +61,4 @@ public class BankApiController {
         InputStreamResource resource = new InputStreamResource(new FileInputStream(fileName));
         return ResponseEntity.ok().body(resource);
     }
-
-
 }

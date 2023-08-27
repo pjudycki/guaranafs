@@ -34,18 +34,20 @@ public class FinancialService {
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final String CURR_SHEET_NAME = "Currencies Rates Report";
 
-    private String URL;
+    private String API_HOST;
+    private String API_KEY;
 
     @PostConstruct
     public void init() {
-        String API_KEY = properties.getKey();
-        String API_HOST = properties.getEndpoint();
-        URL = API_HOST + "/latest?access_key=" + API_KEY;
+        API_KEY = properties.getKey();
+        API_HOST = properties.getEndpoint();
+
     }
 
     public String retrieveAll() {
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.getForEntity(URL, String.class);
+        String LATEST_URL = API_HOST + "/latest?access_key=" + API_KEY;
+        ResponseEntity<String> response = restTemplate.getForEntity(LATEST_URL, String.class);
         HttpStatus statusCode = response.getStatusCode();
         HttpHeaders httpHeaders = response.getHeaders();
 
@@ -56,7 +58,8 @@ public class FinancialService {
 
     public String retrieveWithBase(String base) {
         RestTemplate restTemplate = new RestTemplate();
-        String baseURL = URL + "&base=" + base;
+        String LATEST_URL = API_HOST + "/latest?access_key=" + API_KEY;
+        String baseURL = LATEST_URL + "&base=" + base;
         ResponseEntity<String> response = restTemplate.getForEntity(baseURL, String.class);
         HttpStatus statusCode = response.getStatusCode();
         HttpHeaders httpHeaders = response.getHeaders();
@@ -68,7 +71,21 @@ public class FinancialService {
 
     public String retrieveWithBaseAndList(String base, String listOfCurrencies) {
         RestTemplate restTemplate = new RestTemplate();
-        String baseURL = URL + "&base=" + base + "&symbols=" + listOfCurrencies;
+        String LATEST_URL = API_HOST + "/latest?access_key=" + API_KEY;
+        String baseURL = LATEST_URL + "&base=" + base + "&symbols=" + listOfCurrencies;
+        ResponseEntity<String> response = restTemplate.getForEntity(baseURL, String.class);
+        HttpStatus statusCode = response.getStatusCode();
+        HttpHeaders httpHeaders = response.getHeaders();
+
+        logHttpHeadersAndStatus(httpHeaders, statusCode);
+
+        return response.getBody();
+    }
+
+    public String retrieveWithBaseAndListAndDate(String base, String listOfCurrencies, String date) {
+        RestTemplate restTemplate = new RestTemplate();
+        String HISTORICAL_URL = API_HOST + "/" + date + "?access_key=" + API_KEY;
+        String baseURL = HISTORICAL_URL + "&base=" + base + "&symbols=" + listOfCurrencies;
         ResponseEntity<String> response = restTemplate.getForEntity(baseURL, String.class);
         HttpStatus statusCode = response.getStatusCode();
         HttpHeaders httpHeaders = response.getHeaders();
