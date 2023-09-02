@@ -99,7 +99,7 @@ public class FinancialService {
         XSSFWorkbook guaranaFsWorkbook = new XSSFWorkbook();
         XSSFSheet currenciesSheet = guaranaFsWorkbook.createSheet(CURR_SHEET_NAME);
         String allRates = retrieveAll();
-        Map<String, Double> currToRateOfExchange = getRatesForBase(allRates, base);
+        Map<String, Double> currToRateOfExchange = convertToCurrency(allRates, base);
 
         int rCounter = 0;
         int cCounter = 0;
@@ -148,21 +148,20 @@ public class FinancialService {
             result.put(name, treeNode.findPath(name).doubleValue());
         }
 
-        convertToCurrency(result, currency);
-
         return result;
     }
 
-    private void convertToCurrency(Map<String, Double> result, String currency) {
+    private Map<String, Double> convertToCurrency(String allRates, String currency) throws JsonProcessingException {
+        Map<String, Double> rates = getRatesForBase(allRates, currency);
+        Double rateOfExchange = rates.get(currency);
 
-        Double rateOfExchange = result.get(currency);
-
-        for (Map.Entry<String, Double> entry : result.entrySet()) {
+        for (Map.Entry<String, Double> entry : rates.entrySet()) {
             String name = entry.getKey();
             Double value = entry.getValue();
             Double converted = value / rateOfExchange;
-            result.put(name, converted);
+            rates.put(name, converted);
         }
+        return rates;
     }
 
     private String createFileName(String fileName) {
@@ -191,5 +190,24 @@ public class FinancialService {
         builder.append("\n");
         builder.append("Response HTTP Headers list: ").append(responseHeaders);
         log.info(builder.toString());
+    }
+
+    public Double differenceBetweenDates(String base, String symbol, String startDate, String endDate) {
+        String start = retrieveWithBaseAndListAndDate(base, symbol, startDate);
+        String end = retrieveWithBaseAndListAndDate(base, symbol, endDate);
+        Double diff = null;
+
+        try {
+            Map<String, Double> startMap = getRatesForBase(start, base);
+            Map<String, Double> endMap = getRatesForBase(end, base);
+            Double startCurrency = startMap.get(symbol);
+            Double endCurrency = endMap.get(symbol);
+            diff = endCurrency - startCurrency;
+            System.out.println("test");
+        } catch (JsonProcessingException e) {
+            log.error("Cannot process server response");
+        }
+
+        return diff;
     }
 }

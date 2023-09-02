@@ -48,6 +48,15 @@ public class BankApiController {
         return service.retrieveWithBaseAndListAndDate(base, symbols, date);
     }
 
+    @GetMapping("/diffBetweenDates")
+    @ResponseBody
+    public Double retrieveWithBaseAndCurrenciesListAndDate(@RequestParam String base,
+                                                           @RequestParam String symbol,
+                                                           @RequestParam String startDate,
+                                                           @RequestParam String endDate) {
+        return service.differenceBetweenDates(base, symbol, startDate, endDate);
+    }
+
     @GetMapping("/generateExcelReport")
     @ResponseBody
     public ResponseEntity generateExcelReport(@RequestParam String base) throws FileNotFoundException {
