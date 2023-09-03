@@ -56,6 +56,19 @@ public class FinancialService {
         return response.getBody();
     }
 
+    public String retrieveAllForDate(String date) {
+        RestTemplate restTemplate = new RestTemplate();
+        String HISTORICAL_URL = API_HOST + "/" + date + "?access_key=" + API_KEY;
+        ResponseEntity<String> response = restTemplate.getForEntity(HISTORICAL_URL, String.class);
+        HttpStatus statusCode = response.getStatusCode();
+        HttpHeaders httpHeaders = response.getHeaders();
+
+        logHttpHeadersAndStatus(httpHeaders, statusCode);
+
+        return response.getBody();
+    }
+
+
     public String retrieveWithBase(String base) {
         RestTemplate restTemplate = new RestTemplate();
         String LATEST_URL = API_HOST + "/latest?access_key=" + API_KEY;
@@ -84,27 +97,42 @@ public class FinancialService {
 
     public String retrieveWithBaseAndListAndDate(String base, String listOfCurrencies, String date) {
         RestTemplate restTemplate = new RestTemplate();
+
         String HISTORICAL_URL = API_HOST + "/" + date + "?access_key=" + API_KEY;
         String baseURL = HISTORICAL_URL + "&base=" + base + "&symbols=" + listOfCurrencies;
         ResponseEntity<String> response = restTemplate.getForEntity(baseURL, String.class);
         HttpStatus statusCode = response.getStatusCode();
         HttpHeaders httpHeaders = response.getHeaders();
-
         logHttpHeadersAndStatus(httpHeaders, statusCode);
 
         return response.getBody();
     }
 
-    public String generateExcelReport(String fileName, String base) throws IOException {
+    public String generateReportForDate(String fileName, String base, String date) throws IOException {
+        String allForDate = retrieveAllForDate(date);
+        String resultFileName = createFileName(fileName + "_" + base, date);
+        Map<String, Double> currToRateOfExchange = convertToCurrency(allForDate, base);
+        generateExcelReport(resultFileName, currToRateOfExchange, base);
+
+        return resultFileName;
+    }
+
+    public String generateLatestReport(String fileName, String base) throws IOException {
+        String allRates = retrieveAll();
+        String resultFileName = createFileName(fileName + "_" + base, LocalDate.now().toString());
+        Map<String, Double> currToRateOfExchange = convertToCurrency(allRates, base);
+        generateExcelReport(resultFileName, currToRateOfExchange, base);
+        return resultFileName;
+    }
+
+    public void generateExcelReport(String fileName,  Map<String, Double> currToRateOfExchange, String base) throws IOException {
         XSSFWorkbook guaranaFsWorkbook = new XSSFWorkbook();
         XSSFSheet currenciesSheet = guaranaFsWorkbook.createSheet(CURR_SHEET_NAME);
-        String allRates = retrieveAll();
-        Map<String, Double> currToRateOfExchange = convertToCurrency(allRates, base);
 
         int rCounter = 0;
         int cCounter = 0;
 
-        FileOutputStream fos = new FileOutputStream(createFileName(fileName + "_" + base));
+        FileOutputStream fos = new FileOutputStream(fileName);
         Row firstRow = currenciesSheet.createRow(rCounter++);
 
         Cell firstCell = firstRow.createCell(cCounter);
@@ -135,10 +163,9 @@ public class FinancialService {
             fos.flush();
             fos.close();
         }
-        return fileName;
     }
 
-    private Map<String, Double> getRatesForBase(String allRates, String currency) throws JsonProcessingException {
+    private Map<String, Double> getRatesForBase(String allRates) throws JsonProcessingException {
         Map<String, Double> result = new TreeMap<>();
         JsonNode treeNode = mapper.readTree(allRates);
         Iterator<String> fields = treeNode.path("rates").fieldNames();
@@ -152,7 +179,7 @@ public class FinancialService {
     }
 
     private Map<String, Double> convertToCurrency(String allRates, String currency) throws JsonProcessingException {
-        Map<String, Double> rates = getRatesForBase(allRates, currency);
+        Map<String, Double> rates = getRatesForBase(allRates);
         Double rateOfExchange = rates.get(currency);
 
         for (Map.Entry<String, Double> entry : rates.entrySet()) {
@@ -161,11 +188,12 @@ public class FinancialService {
             Double converted = value / rateOfExchange;
             rates.put(name, converted);
         }
+
         return rates;
     }
 
-    private String createFileName(String fileName) {
-        return fileName + "_" + LocalDate.now() + ".xlsx";
+    private String createFileName(String fileName, String date) {
+        return fileName + "_" + date + ".xlsx";
     }
 
     private void addValuesToRow(String name, Double value, Row row, int cCounter, String base) {
@@ -190,6 +218,7 @@ public class FinancialService {
         builder.append("\n");
         builder.append("Response HTTP Headers list: ").append(responseHeaders);
         log.info(builder.toString());
+
     }
 
     public Double differenceBetweenDates(String base, String symbol, String startDate, String endDate) {
@@ -198,8 +227,8 @@ public class FinancialService {
         Double diff = null;
 
         try {
-            Map<String, Double> startMap = getRatesForBase(start, base);
-            Map<String, Double> endMap = getRatesForBase(end, base);
+            Map<String, Double> startMap = getRatesForBase(start);
+            Map<String, Double> endMap = getRatesForBase(end);
             Double startCurrency = startMap.get(symbol);
             Double endCurrency = endMap.get(symbol);
             diff = endCurrency - startCurrency;

@@ -28,6 +28,12 @@ public class BankApiController {
         return service.retrieveAll();
     }
 
+    @GetMapping("/retrieveAllForDate")
+    @ResponseBody
+    public String retrieveAllForDate(@RequestParam String date) {
+        return service.retrieveAllForDate(date);
+    }
+
     @GetMapping("/retrieveWithBase")
     @ResponseBody
     public String retrieveWithBase(@RequestParam String base) {
@@ -57,12 +63,27 @@ public class BankApiController {
         return service.differenceBetweenDates(base, symbol, startDate, endDate);
     }
 
-    @GetMapping("/generateExcelReport")
+    @GetMapping("/generateLatestReport")
     @ResponseBody
-    public ResponseEntity generateExcelReport(@RequestParam String base) throws FileNotFoundException {
+    public ResponseEntity generateLatestReport(@RequestParam String base) throws FileNotFoundException {
         String fileName;
         try {
-            fileName = service.generateExcelReport("currencies", base);
+            fileName = service.generateLatestReport("currencies", base);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(fileName));
+        return ResponseEntity.ok().body(resource);
+    }
+
+    @GetMapping("/generateHistoricalReport")
+    @ResponseBody
+    public ResponseEntity generateHistoricalReport(@RequestParam String base,
+                                                   @RequestParam String date) throws FileNotFoundException {
+        String fileName;
+        try {
+            fileName = service.generateReportForDate("currencies", base, date);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
