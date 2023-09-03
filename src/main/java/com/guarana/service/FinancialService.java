@@ -239,4 +239,11 @@ public class FinancialService {
 
         return diff;
     }
+
+    public Double convert(String base, String symbol, String amount) throws JsonProcessingException {
+        String result = retrieveWithBaseAndList(base, symbol);
+        Map<String, Double> rates = getRatesForBase(result);
+        Double rate = rates.get(symbol);
+        return rate * Double.parseDouble(amount);
+    }
 }

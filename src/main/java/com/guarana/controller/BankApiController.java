@@ -1,5 +1,6 @@
 package com.guarana.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.guarana.service.FinancialService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,11 +57,19 @@ public class BankApiController {
 
     @GetMapping("/diffBetweenDates")
     @ResponseBody
-    public Double retrieveWithBaseAndCurrenciesListAndDate(@RequestParam String base,
-                                                           @RequestParam String symbol,
-                                                           @RequestParam String startDate,
-                                                           @RequestParam String endDate) {
+    public Double diffBetweenDates(@RequestParam String base,
+                                   @RequestParam String symbol,
+                                   @RequestParam String startDate,
+                                   @RequestParam String endDate) {
         return service.differenceBetweenDates(base, symbol, startDate, endDate);
+    }
+
+    @GetMapping("/convert")
+    @ResponseBody
+    public Double convert(@RequestParam String base,
+                          @RequestParam String symbol,
+                          @RequestParam String amount) throws JsonProcessingException {
+        return service.convert(base, symbol, amount);
     }
 
     @GetMapping("/generateLatestReport")
