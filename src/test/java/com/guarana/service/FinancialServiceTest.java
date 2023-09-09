@@ -24,7 +24,7 @@ public class FinancialServiceTest {
 
         //given
         //when
-        String jsonValues = financialService.retrieveAll();
+        String jsonValues = financialService.retrieveLatestFromAPI(null, null);
 
         //then
         JsonNode nodeValues = mapper.readTree(jsonValues);
@@ -39,7 +39,7 @@ public class FinancialServiceTest {
     public void testRetrieveWithBase() throws JsonProcessingException {
         //given
         //when
-        String jsonValues = financialService.retrieveWithBase("EUR");
+        String jsonValues = financialService.retrieveLatestFromAPI("EUR", null);
 
         //then
         JsonNode nodeValues = mapper.readTree(jsonValues);
@@ -55,7 +55,7 @@ public class FinancialServiceTest {
     public void testRetrieveWithBaseAndList() throws JsonProcessingException {
         //given
         //when
-        String jsonValues = financialService.retrieveWithBaseAndList("EUR", "USD, GBP, CHF");
+        String jsonValues = financialService.retrieveLatestFromAPI("EUR", "USD, GBP, CHF");
 
         //then
         JsonNode nodeValues = mapper.readTree(jsonValues);

@@ -41,19 +41,6 @@ public class FinancialService {
     public void init() {
         API_KEY = properties.getKey();
         API_HOST = properties.getEndpoint();
-
-    }
-
-    public String retrieveAll() {
-        RestTemplate restTemplate = new RestTemplate();
-        String LATEST_URL = API_HOST + "/latest?access_key=" + API_KEY;
-        ResponseEntity<String> response = restTemplate.getForEntity(LATEST_URL, String.class);
-        HttpStatus statusCode = response.getStatusCode();
-        HttpHeaders httpHeaders = response.getHeaders();
-
-        logHttpHeadersAndStatus(httpHeaders, statusCode);
-
-        return response.getBody();
     }
 
     public String retrieveAllForDate(String date) {
@@ -68,44 +55,35 @@ public class FinancialService {
         return response.getBody();
     }
 
-
-    public String retrieveWithBase(String base) {
-        RestTemplate restTemplate = new RestTemplate();
-        String LATEST_URL = API_HOST + "/latest?access_key=" + API_KEY;
-        String baseURL = LATEST_URL + "&base=" + base;
-        ResponseEntity<String> response = restTemplate.getForEntity(baseURL, String.class);
-        HttpStatus statusCode = response.getStatusCode();
-        HttpHeaders httpHeaders = response.getHeaders();
-
-        logHttpHeadersAndStatus(httpHeaders, statusCode);
-
-        return response.getBody();
+    public String retrieveLatestFromAPI(String base, String symbols) {
+        return retrieveFromAPI(API_HOST + "/latest?access_key=" + API_KEY, base, symbols);
     }
 
-    public String retrieveWithBaseAndList(String base, String listOfCurrencies) {
+    public String retrieveFromAPI(String basePath, String base, String symbols) {
         RestTemplate restTemplate = new RestTemplate();
-        String LATEST_URL = API_HOST + "/latest?access_key=" + API_KEY;
-        String baseURL = LATEST_URL + "&base=" + base + "&symbols=" + listOfCurrencies;
-        ResponseEntity<String> response = restTemplate.getForEntity(baseURL, String.class);
+        StringBuilder latestURL = new StringBuilder(basePath);
+
+        if (base != null) {
+            latestURL.append("&base=");
+            latestURL.append(base);
+        }
+
+        if (symbols != null) {
+            latestURL.append("&symbols=");
+            latestURL.append(symbols);
+        }
+
+        ResponseEntity<String> response = restTemplate.getForEntity(latestURL.toString(), String.class);
         HttpStatus statusCode = response.getStatusCode();
         HttpHeaders httpHeaders = response.getHeaders();
 
         logHttpHeadersAndStatus(httpHeaders, statusCode);
-
         return response.getBody();
+
     }
 
-    public String retrieveWithBaseAndListAndDate(String base, String listOfCurrencies, String date) {
-        RestTemplate restTemplate = new RestTemplate();
-
-        String HISTORICAL_URL = API_HOST + "/" + date + "?access_key=" + API_KEY;
-        String baseURL = HISTORICAL_URL + "&base=" + base + "&symbols=" + listOfCurrencies;
-        ResponseEntity<String> response = restTemplate.getForEntity(baseURL, String.class);
-        HttpStatus statusCode = response.getStatusCode();
-        HttpHeaders httpHeaders = response.getHeaders();
-        logHttpHeadersAndStatus(httpHeaders, statusCode);
-
-        return response.getBody();
+    public String retrieveWithBaseAndListAndDate(String base, String symbols, String date) {
+        return retrieveFromAPI(API_HOST + "/" + date + "?access_key=" + API_KEY, base, symbols);
     }
 
     public String generateReportForDate(String fileName, String base, String date) throws IOException {
@@ -118,14 +96,14 @@ public class FinancialService {
     }
 
     public String generateLatestReport(String fileName, String base) throws IOException {
-        String allRates = retrieveAll();
+        String allRates = retrieveLatestFromAPI(null, null);
         String resultFileName = createFileName(fileName + "_" + base, LocalDate.now().toString());
         Map<String, Double> currToRateOfExchange = convertToCurrency(allRates, base);
         generateExcelReport(resultFileName, currToRateOfExchange, base);
         return resultFileName;
     }
 
-    public void generateExcelReport(String fileName,  Map<String, Double> currToRateOfExchange, String base) throws IOException {
+    public void generateExcelReport(String fileName, Map<String, Double> currToRateOfExchange, String base) throws IOException {
         XSSFWorkbook guaranaFsWorkbook = new XSSFWorkbook();
         XSSFSheet currenciesSheet = guaranaFsWorkbook.createSheet(CURR_SHEET_NAME);
 
@@ -193,7 +171,11 @@ public class FinancialService {
     }
 
     private String createFileName(String fileName, String date) {
-        return fileName + "_" + date + ".xlsx";
+        StringBuilder result = new StringBuilder(fileName);
+        result.append("_");
+        result.append(date);
+        result.append(".xlsx");
+        return result.toString();
     }
 
     private void addValuesToRow(String name, Double value, Row row, int cCounter, String base) {
@@ -221,27 +203,22 @@ public class FinancialService {
 
     }
 
-    public Double differenceBetweenDates(String base, String symbol, String startDate, String endDate) {
+    public Double differenceBetweenDates(String base, String symbol, String startDate, String endDate) throws JsonProcessingException {
         String start = retrieveWithBaseAndListAndDate(base, symbol, startDate);
         String end = retrieveWithBaseAndListAndDate(base, symbol, endDate);
-        Double diff = null;
+        Double diff;
 
-        try {
-            Map<String, Double> startMap = getRatesForBase(start);
-            Map<String, Double> endMap = getRatesForBase(end);
-            Double startCurrency = startMap.get(symbol);
-            Double endCurrency = endMap.get(symbol);
-            diff = endCurrency - startCurrency;
-            System.out.println("test");
-        } catch (JsonProcessingException e) {
-            log.error("Cannot process server response");
-        }
+        Map<String, Double> startMap = getRatesForBase(start);
+        Map<String, Double> endMap = getRatesForBase(end);
+        Double startCurrency = startMap.get(symbol);
+        Double endCurrency = endMap.get(symbol);
+        diff = endCurrency - startCurrency;
 
         return diff;
     }
 
     public Double convert(String base, String symbol, String amount) throws JsonProcessingException {
-        String result = retrieveWithBaseAndList(base, symbol);
+        String result = retrieveLatestFromAPI(base, symbol);
         Map<String, Double> rates = getRatesForBase(result);
         Double rate = rates.get(symbol);
         return rate * Double.parseDouble(amount);

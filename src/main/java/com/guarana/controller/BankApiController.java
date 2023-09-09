@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,7 +25,7 @@ public class BankApiController {
     @GetMapping("/retrieveAll")
     @ResponseBody
     public String retrieveAll() {
-        return service.retrieveAll();
+        return service.retrieveLatestFromAPI(null, null);
     }
 
     @GetMapping("/retrieveAllForDate")
@@ -38,13 +37,13 @@ public class BankApiController {
     @GetMapping("/retrieveWithBase")
     @ResponseBody
     public String retrieveWithBase(@RequestParam String base) {
-        return service.retrieveWithBase(base);
+        return service.retrieveLatestFromAPI(base, null);
     }
 
     @GetMapping("/retrieveWithBaseAndList")
     @ResponseBody
     public String retrieveWithBaseAndCurrenciesList(@RequestParam String base, @RequestParam String symbols) {
-        return service.retrieveWithBaseAndList(base, symbols);
+        return service.retrieveLatestFromAPI(base, symbols);
     }
 
     @GetMapping("/retrieveWithBaseAndListAndDate")
@@ -57,11 +56,16 @@ public class BankApiController {
 
     @GetMapping("/diffBetweenDates")
     @ResponseBody
-    public Double diffBetweenDates(@RequestParam String base,
+    public ResponseEntity diffBetweenDates(@RequestParam String base,
                                    @RequestParam String symbol,
                                    @RequestParam String startDate,
                                    @RequestParam String endDate) {
-        return service.differenceBetweenDates(base, symbol, startDate, endDate);
+        try {
+            return ResponseEntity.ok().body(service.differenceBetweenDates(base, symbol, startDate, endDate));
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @GetMapping("/convert")
