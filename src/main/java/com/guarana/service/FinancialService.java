@@ -21,7 +21,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,9 +33,10 @@ public class FinancialService {
     @Autowired
     private GuaranaConfigurationProperties properties;
 
-    private static final ObjectMapper mapper = new ObjectMapper();
-    private static final String CURR_SHEET_NAME = "Currencies Rates Report";
+    @Autowired
+    private ObjectMapper mapper;
 
+    private static final String CURR_SHEET_NAME = "Currencies Rates Report";
     private String API_HOST;
     private String API_KEY;
 

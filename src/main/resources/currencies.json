@@ -1,5 +1,6 @@
 {
   "success": true,
+  "historical": true,
   "timestamp": 1685786823,
   "base": "EUR",
   "date": "2023-06-03",

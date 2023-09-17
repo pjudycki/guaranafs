@@ -57,9 +57,9 @@ public class BankApiController {
     @GetMapping("/diffBetweenDates")
     @ResponseBody
     public ResponseEntity diffBetweenDates(@RequestParam String base,
-                                   @RequestParam String symbol,
-                                   @RequestParam String startDate,
-                                   @RequestParam String endDate) {
+                                           @RequestParam String symbol,
+                                           @RequestParam String startDate,
+                                           @RequestParam String endDate) {
         try {
             return ResponseEntity.ok().body(service.differenceBetweenDates(base, symbol, startDate, endDate));
         } catch (JsonProcessingException e) {
@@ -105,3 +105,5 @@ public class BankApiController {
         return ResponseEntity.ok().body(resource);
     }
 }
+
+
