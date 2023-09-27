@@ -10,16 +10,10 @@ import java.util.Map;
 
 public class CurrencyFactory {
 
-    public static List<CurrencyEntity> toCurrencyEntity(CurrencyList currencyList) {
+    public static List<CurrencyEntity> toCurrencyEntity(CurrencyList currencyList, RetrievalEntity retrieval) {
         Map<String, Double> rates = currencyList.getRates();
         List<CurrencyEntity> result = new ArrayList<>();
 
-        RetrievalEntity retrievalEntity = new RetrievalEntity();
-        retrievalEntity.setBase(currencyList.getBase());
-        retrievalEntity.setHistorical(currencyList.isHistorical());
-        retrievalEntity.setSuccess(currencyList.isSuccess());
-        retrievalEntity.setDate(currencyList.getDate());
-        retrievalEntity.setTimestamp(currencyList.getTimestamp());
 
         for(Map.Entry<String, Double> entry : rates.entrySet()) {
             String name = entry.getKey();
@@ -28,7 +22,7 @@ public class CurrencyFactory {
             CurrencyEntity currency = new CurrencyEntity();
             currency.setCurrencyName(name);
             currency.setRateOfExchange(value);
-            currency.setRetrievalId(retrievalEntity);
+            currency.setRetrievalId(retrieval);
             result.add(currency);
         }
 

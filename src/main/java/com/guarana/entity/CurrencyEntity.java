@@ -38,4 +38,15 @@ public class CurrencyEntity {
         this.retrievalId = retrievalId;
     }
 
+    public RetrievalEntity getRetrievalId() {
+        return retrievalId;
+    }
+
+    public Double getRateOfExchange() {
+        return rateOfExchange;
+    }
+
+    public String getCurrencyName() {
+        return currencyName;
+    }
 }
