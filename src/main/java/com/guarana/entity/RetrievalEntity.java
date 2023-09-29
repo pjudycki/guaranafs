@@ -46,4 +46,28 @@ public class RetrievalEntity {
         this.base = base;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public Boolean getSuccess() {
+        return success;
+    }
+
+    public Boolean getHistorical() {
+        return historical;
+    }
+
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public String getBase() {
+        return base;
+    }
+
 }

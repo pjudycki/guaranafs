@@ -9,13 +9,22 @@ import com.guarana.factory.RetrievalFactory;
 import com.guarana.model.CurrencyList;
 import com.guarana.repository.CurrencyRepository;
 import com.guarana.repository.RetrievalRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+
+import static java.time.temporal.ChronoUnit.DAYS;
 
 @Service
+@Slf4j
 public class GetExchangeRates {
 
     @Autowired
@@ -30,21 +39,51 @@ public class GetExchangeRates {
     @Autowired
     private RetrievalRepository retrievalRepository;
 
-    @Scheduled(fixedDelay = 60000)
-    public void  processAndSave() throws JsonProcessingException {
-        processAndSaveForCurrency("EUR");
-        processAndSaveForCurrency("USD");
-        processAndSaveForCurrency("GBP");
-        processAndSaveForCurrency("CHF");
+    @PersistenceContext
+    private EntityManager entityManager;
+
+
+    //@Scheduled(fixedDelay = 60000)
+    public void processAndSave() throws JsonProcessingException {
+        String result = financialService.retrieveLatestFromAPI("EUR", null);
+        processAndSaveForCurrency(result);
+        result = financialService.retrieveLatestFromAPI("USD", null);
+        processAndSaveForCurrency(result);
+        result = financialService.retrieveLatestFromAPI("GBP", null);
+        processAndSaveForCurrency(result);
+        result = financialService.retrieveLatestFromAPI("CHF", null);
+        processAndSaveForCurrency(result);
     }
 
-    private void processAndSaveForCurrency(String currency) throws JsonProcessingException {
-        String result = financialService.retrieveLatestFromAPI(currency, null);
-        CurrencyList currencyList = objectMapper.readValue(result, CurrencyList.class);
+    @PostConstruct
+    public void processAndSaveHistorical() throws JsonProcessingException {
+       Query query = entityManager.createQuery("SELECT re FROM RetrievalEntity re ORDER by re.date DESC");
+       query.setMaxResults(1);
+       Optional singleResult = query.getResultList().stream().findFirst();
+       LocalDate retrievalStartDate = LocalDate.of(2023, 1, 1);
 
+       if (singleResult.isPresent()) {
+           RetrievalEntity retrievalEntity = (RetrievalEntity) singleResult.get();
+           retrievalStartDate = retrievalEntity.getDate();
+       }
+
+       long days = DAYS.between(retrievalStartDate, LocalDate.now());
+       long counter = 0L;
+
+       while (counter < days) {
+           String result = financialService.retrieveAllForDate(retrievalStartDate.toString());
+           log.info(result);
+           processAndSaveForCurrency(result);
+           counter++;
+           retrievalStartDate = retrievalStartDate.plusDays(1);
+       }
+    }
+
+    private void processAndSaveForCurrency(String result) throws JsonProcessingException {
+        CurrencyList currencyList = objectMapper.readValue(result, CurrencyList.class);
         RetrievalEntity retrievalEntity = retrievalRepository.save(RetrievalFactory.toRetrievalEntity(currencyList));
         List<CurrencyEntity> currencyEntities = CurrencyFactory.toCurrencyEntity(currencyList, retrievalEntity);
-
         currencyRepository.saveAll(currencyEntities);
     }
+
 }
