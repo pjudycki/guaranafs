@@ -55,7 +55,7 @@ public class GetExchangeRates {
         processAndSaveForCurrency(result);
     }
 
-    @PostConstruct
+    //@PostConstruct
     public void processAndSaveHistorical() throws JsonProcessingException {
        Query query = entityManager.createQuery("SELECT re FROM RetrievalEntity re ORDER by re.date DESC");
        query.setMaxResults(1);

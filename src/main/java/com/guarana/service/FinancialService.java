@@ -226,4 +226,43 @@ public class FinancialService {
         Double rate = rates.get(symbol);
         return rate * Double.parseDouble(amount);
     }
+
+    public String convertByApi(String from, String to, String amount) {
+        StringBuilder builder = new StringBuilder(API_HOST + "/convert?access_key=" + API_KEY);
+        builder.append("&from=");
+        builder.append(from);
+        builder.append("&to=");
+        builder.append(to);
+        builder.append("&amount=");
+        builder.append(amount);
+
+        return retrieveFromAPI(builder.toString(), null, null);
+    }
+
+    public String getTimeSeries(String startDate, String endDate) {
+        StringBuilder builder = new StringBuilder(API_HOST + "/timeseries?access_key=" + API_KEY);
+        builder.append("&start_date=");
+        builder.append(startDate);
+        builder.append("&end_date=");
+        builder.append(endDate);
+
+        return retrieveFromAPI(builder.toString(), null, null);
+    }
+
+    public String getFluctuation(String startDate, String endDate) {
+        StringBuilder builder = new StringBuilder(API_HOST + "/fluctuation?access_key=" + API_KEY);
+        builder.append("&start_date=");
+        builder.append(startDate);
+        builder.append("&end_date=");
+        builder.append(endDate);
+
+        return retrieveFromAPI(builder.toString(), null, null);
+    }
+
+    public String getSymbols() {
+        StringBuilder builder = new StringBuilder(API_HOST + "/symbols?access_key=" + API_KEY);
+
+        return retrieveFromAPI(builder.toString(), null, null);
+    }
 }
+

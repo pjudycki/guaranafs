@@ -76,6 +76,35 @@ public class BankApiController {
         return service.convert(base, symbol, amount);
     }
 
+    @GetMapping("/convertByApi")
+    @ResponseBody
+    public String convertByAPI(@RequestParam String from,
+                               @RequestParam String to,
+                               @RequestParam String amount) {
+        return service.convertByApi(from, to, amount);
+    }
+
+    @GetMapping("/timeseries")
+    @ResponseBody
+    public String timeseries(@RequestParam String startDate,
+                             @RequestParam String endDate) {
+        return service.getTimeSeries(startDate, endDate);
+    }
+
+    @GetMapping("/fluctuation")
+    @ResponseBody
+    public String fluctuation(@RequestParam String startDate,
+                             @RequestParam String endDate) {
+        return service.getFluctuation(startDate, endDate);
+    }
+
+    @GetMapping("/symbols")
+    @ResponseBody
+    public String symbols() {
+        return service.getSymbols();
+    }
+
+
     @GetMapping("/generateLatestReport")
     @ResponseBody
     public ResponseEntity generateLatestReport(@RequestParam String base) throws FileNotFoundException {
