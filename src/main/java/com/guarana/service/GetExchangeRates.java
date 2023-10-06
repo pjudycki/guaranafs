@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -44,19 +43,19 @@ public class GetExchangeRates {
 
 
     //@Scheduled(fixedDelay = 60000)
-    public void processAndSave() throws JsonProcessingException {
-        String result = financialService.retrieveLatestFromAPI("EUR", null);
+    public void processAndSave() {
+        CurrencyList result = financialService.retrieveLatest("EUR", null);
         processAndSaveForCurrency(result);
-        result = financialService.retrieveLatestFromAPI("USD", null);
+        result = financialService.retrieveLatest("USD", null);
         processAndSaveForCurrency(result);
-        result = financialService.retrieveLatestFromAPI("GBP", null);
+        result = financialService.retrieveLatest("GBP", null);
         processAndSaveForCurrency(result);
-        result = financialService.retrieveLatestFromAPI("CHF", null);
+        result = financialService.retrieveLatest("CHF", null);
         processAndSaveForCurrency(result);
     }
 
     //@PostConstruct
-    public void processAndSaveHistorical() throws JsonProcessingException {
+    public void processAndSaveHistorical() {
        Query query = entityManager.createQuery("SELECT re FROM RetrievalEntity re ORDER by re.date DESC");
        query.setMaxResults(1);
        Optional singleResult = query.getResultList().stream().findFirst();
@@ -71,16 +70,15 @@ public class GetExchangeRates {
        long counter = 0L;
 
        while (counter < days) {
-           String result = financialService.retrieveAllForDate(retrievalStartDate.toString());
-           log.info(result);
+           CurrencyList result = financialService.retrieveHistorical(null, null, retrievalStartDate.toString());
+           log.info(String.valueOf(result));
            processAndSaveForCurrency(result);
            counter++;
            retrievalStartDate = retrievalStartDate.plusDays(1);
        }
     }
 
-    private void processAndSaveForCurrency(String result) throws JsonProcessingException {
-        CurrencyList currencyList = objectMapper.readValue(result, CurrencyList.class);
+    private void processAndSaveForCurrency(CurrencyList currencyList) {
         RetrievalEntity retrievalEntity = retrievalRepository.save(RetrievalFactory.toRetrievalEntity(currencyList));
         List<CurrencyEntity> currencyEntities = CurrencyFactory.toCurrencyEntity(currencyList, retrievalEntity);
         currencyRepository.saveAll(currencyEntities);

@@ -1,6 +1,7 @@
 package com.guarana.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.guarana.model.*;
 import com.guarana.service.FinancialService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,92 +23,93 @@ public class BankApiController {
     @Autowired
     private FinancialService service;
 
-    @GetMapping("/retrieveAll")
+    @GetMapping("/retrieveLatest")
     @ResponseBody
-    public String retrieveAll() {
-        return service.retrieveLatestFromAPI(null, null);
+    public ResponseEntity<CurrencyList> retrieveLatest() {
+        return ResponseEntity.ok().body(service.retrieveLatest(null, null));
     }
 
-    @GetMapping("/retrieveAllForDate")
+    @GetMapping("/retrieveHistorical")
     @ResponseBody
-    public String retrieveAllForDate(@RequestParam String date) {
-        return service.retrieveAllForDate(date);
+    public ResponseEntity<CurrencyList> retrieveHistorical(@RequestParam String date) {
+        return ResponseEntity.ok().body(service.retrieveHistorical( null, null, date));
     }
 
-    @GetMapping("/retrieveWithBase")
+    @GetMapping("/retrieveLatestWithBase")
     @ResponseBody
-    public String retrieveWithBase(@RequestParam String base) {
-        return service.retrieveLatestFromAPI(base, null);
+    public ResponseEntity<CurrencyList> retrieveLatestWithBase(@RequestParam String base) {
+        return ResponseEntity.ok().body(service.retrieveLatest(base, null));
     }
 
-    @GetMapping("/retrieveWithBaseAndList")
+    @GetMapping("/retrieveLatestWithBaseAndSymbols")
     @ResponseBody
-    public String retrieveWithBaseAndCurrenciesList(@RequestParam String base, @RequestParam String symbols) {
-        return service.retrieveLatestFromAPI(base, symbols);
+    public ResponseEntity<CurrencyList> retrieveLatestWithBaseAndSymbols(@RequestParam String base,
+                                                                         @RequestParam String symbols) {
+        return ResponseEntity.ok().body(service.retrieveLatest(base, symbols));
     }
 
-    @GetMapping("/retrieveWithBaseAndListAndDate")
+    @GetMapping("/retrieveHistoricalWithBaseAndSymbolsAndDate")
     @ResponseBody
-    public String retrieveWithBaseAndCurrenciesListAndDate(@RequestParam String base,
-                                                           @RequestParam String symbols,
-                                                           @RequestParam String date) {
-        return service.retrieveWithBaseAndListAndDate(base, symbols, date);
+    public ResponseEntity<CurrencyList> retrieveHistoricalWithBaseAndSymbolsAndDate(@RequestParam String base,
+                                                                                    @RequestParam String symbols,
+                                                                                    @RequestParam String date) {
+        return ResponseEntity.ok().body(service.retrieveHistorical(base, symbols, date));
     }
 
-    @GetMapping("/diffBetweenDates")
+    @GetMapping("/computeChange")
     @ResponseBody
-    public ResponseEntity diffBetweenDates(@RequestParam String base,
-                                           @RequestParam String symbol,
-                                           @RequestParam String startDate,
-                                           @RequestParam String endDate) {
+    public ResponseEntity<Double> computeChange(@RequestParam String base,
+                                                @RequestParam String symbol,
+                                                @RequestParam String startDate,
+                                                @RequestParam String endDate) {
         try {
-            return ResponseEntity.ok().body(service.differenceBetweenDates(base, symbol, startDate, endDate));
+            return ResponseEntity.ok().body(service.computeChange(base, symbol, startDate, endDate));
         } catch (JsonProcessingException e) {
             log.error(e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
     }
 
-    @GetMapping("/convert")
+    @GetMapping("/computeConversion")
     @ResponseBody
-    public Double convert(@RequestParam String base,
-                          @RequestParam String symbol,
-                          @RequestParam String amount) throws JsonProcessingException {
-        return service.convert(base, symbol, amount);
+    public ResponseEntity<Double> computeConversion(@RequestParam String base,
+                                                    @RequestParam String symbol,
+                                                    @RequestParam String amount) {
+        return ResponseEntity.ok().body(service.computeConversion(base, symbol, amount));
     }
 
-    @GetMapping("/convertByApi")
+    @GetMapping("/convert")
     @ResponseBody
-    public String convertByAPI(@RequestParam String from,
-                               @RequestParam String to,
-                               @RequestParam String amount) {
-        return service.convertByApi(from, to, amount);
+    public ResponseEntity<ConvertItem> convert(@RequestParam String from,
+                                               @RequestParam String to,
+                                               @RequestParam String amount) {
+        return ResponseEntity.ok().body(service.convert(from, to, amount));
     }
 
     @GetMapping("/timeseries")
     @ResponseBody
-    public String timeseries(@RequestParam String startDate,
-                             @RequestParam String endDate) {
-        return service.getTimeSeries(startDate, endDate);
+    public ResponseEntity<TimeseriesList> timeseries(@RequestParam String startDate,
+                                                     @RequestParam String endDate) {
+        return ResponseEntity.ok().body(service.getTimeSeries(startDate, endDate));
     }
 
     @GetMapping("/fluctuation")
     @ResponseBody
-    public String fluctuation(@RequestParam String startDate,
-                             @RequestParam String endDate) {
-        return service.getFluctuation(startDate, endDate);
+    public ResponseEntity<FluctuationList> fluctuation(@RequestParam String startDate,
+                                                       @RequestParam String endDate) {
+        return ResponseEntity.ok().body(service.getFluctuation(startDate, endDate));
     }
 
     @GetMapping("/symbols")
     @ResponseBody
-    public String symbols() {
-        return service.getSymbols();
+    public ResponseEntity<SymbolList> symbols() {
+        return ResponseEntity.ok().body(service.getSymbols());
     }
-
 
     @GetMapping("/generateLatestReport")
     @ResponseBody
-    public ResponseEntity generateLatestReport(@RequestParam String base) throws FileNotFoundException {
+    public ResponseEntity<InputStreamResource> generateLatestReport(@RequestParam String base) throws FileNotFoundException {
+
         String fileName;
         try {
             fileName = service.generateLatestReport("currencies", base);
@@ -121,11 +123,11 @@ public class BankApiController {
 
     @GetMapping("/generateHistoricalReport")
     @ResponseBody
-    public ResponseEntity generateHistoricalReport(@RequestParam String base,
+    public ResponseEntity<InputStreamResource> generateHistoricalReport(@RequestParam String base,
                                                    @RequestParam String date) throws FileNotFoundException {
         String fileName;
         try {
-            fileName = service.generateReportForDate("currencies", base, date);
+            fileName = service.generateHistoricalReport("currencies", base, date);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
@@ -134,5 +136,3 @@ public class BankApiController {
         return ResponseEntity.ok().body(resource);
     }
 }
-
-
