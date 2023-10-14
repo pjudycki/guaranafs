@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -102,7 +103,7 @@ public class BankApiController {
 
     @GetMapping("/symbols")
     @ResponseBody
-    public ResponseEntity<SymbolList> symbols() {
+    public ResponseEntity<List<SymbolItem>> symbols() {
         return ResponseEntity.ok().body(service.getSymbols());
     }
 
@@ -124,7 +125,7 @@ public class BankApiController {
     @GetMapping("/generateHistoricalReport")
     @ResponseBody
     public ResponseEntity<InputStreamResource> generateHistoricalReport(@RequestParam String base,
-                                                   @RequestParam String date) throws FileNotFoundException {
+                                                                        @RequestParam String date) throws FileNotFoundException {
         String fileName;
         try {
             fileName = service.generateHistoricalReport("currencies", base, date);

@@ -9,7 +9,7 @@ public class RetrievalEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "retrieval_id")
+    @Column
     private Long id;
     @Column
     private Boolean success;

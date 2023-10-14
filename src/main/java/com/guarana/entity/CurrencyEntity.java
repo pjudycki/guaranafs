@@ -12,10 +12,10 @@ public class CurrencyEntity {
     @Column
     private Long id;
 
-    @Column
+    @Column(name = "currency_name")
     private String currencyName;
 
-    @Column
+    @Column(name = "rate_of_exchange")
     private Double rateOfExchange;
 
     @ManyToOne

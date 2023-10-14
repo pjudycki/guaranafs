@@ -59,7 +59,7 @@ public class GetExchangeRates {
        Query query = entityManager.createQuery("SELECT re FROM RetrievalEntity re ORDER by re.date DESC");
        query.setMaxResults(1);
        Optional singleResult = query.getResultList().stream().findFirst();
-       LocalDate retrievalStartDate = LocalDate.of(2023, 1, 1);
+       LocalDate retrievalStartDate = LocalDate.of(2023, 10, 1);
 
        if (singleResult.isPresent()) {
            RetrievalEntity retrievalEntity = (RetrievalEntity) singleResult.get();

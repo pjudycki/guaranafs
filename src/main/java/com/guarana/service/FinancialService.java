@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -126,10 +127,14 @@ public class FinancialService {
         return retrieve(builder.toString(), null, null, FluctuationList.class);
     }
 
-    public SymbolList getSymbols() {
+    public List<SymbolItem> getSymbols() {
         StringBuilder builder = new StringBuilder(API_HOST + "/symbols?access_key=" + API_KEY);
 
-        return retrieve(builder.toString(), null, null, SymbolList.class);
+        SymbolList symbolList =  retrieve(builder.toString(), null, null, SymbolList.class);
+
+        return symbolList.getSymbols().entrySet().stream()
+                .map(s -> SymbolItem.builder().currencyCode(s.getKey()).currencyName(s.getValue()).build())
+                .collect(Collectors.toList());
     }
 
     public String generateHistoricalReport(String fileName, String base, String date) throws IOException {

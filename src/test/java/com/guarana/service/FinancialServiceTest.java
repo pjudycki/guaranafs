@@ -17,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import static org.mockito.Mockito.when;
 
@@ -137,12 +138,10 @@ public class FinancialServiceTest {
         String latestURL = "null/symbols?access_key=null";
         when(restTemplate.getForEntity(latestURL, SymbolList.class)).thenReturn(responseEntity);
         //when
-        SymbolList result = financialService.getSymbols();
+        List<SymbolItem> result = financialService.getSymbols();
 
         //then
-        Assertions.assertThat(result.getSymbols().size()).isEqualTo(4);
-        Assertions.assertThat(result.isSuccess()).isEqualTo(true);
-
+        Assertions.assertThat(result.size()).isEqualTo(4);
     }
 
     @Test
