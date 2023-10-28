@@ -74,6 +74,16 @@ public class FinancialService {
         return retrieve(API_HOST + "/latest?access_key=" + API_KEY, base, symbols, CurrencyList.class);
     }
 
+    public List<CurrencyItem> retrieveLatestAsCurrencyItem() {
+        CurrencyList currencyList = retrieve(API_HOST + "/latest?access_key=" + API_KEY, "EUR", null, CurrencyList.class);
+        return currencyList.getRates().entrySet()
+                .stream()
+                .map(item-> CurrencyItem.builder()
+                        .fromCurrency(currencyList.getBase())
+                        .toCurrency(item.getKey()).rate(item.getValue())
+                        .date(currencyList.getDate()).build()).collect(Collectors.toList());
+    }
+
     public Double computeChange(String base, String symbol, String startDate, String endDate) throws JsonProcessingException {
         CurrencyList start = retrieveHistorical(base, symbol, startDate);
         CurrencyList end = retrieveHistorical(base, symbol, endDate);

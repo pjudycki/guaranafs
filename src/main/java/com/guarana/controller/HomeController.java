@@ -23,4 +23,10 @@ public class HomeController {
         model.addAttribute("symbolList", financialService.getSymbols());
         return new ModelAndView("view-symbols");
     }
+
+    @GetMapping("/viewLatest")
+    public ModelAndView viewLatest(Model model) {
+        model.addAttribute("latestList", financialService.retrieveLatestAsCurrencyItem());
+        return new ModelAndView("view-latest");
+    }
 }

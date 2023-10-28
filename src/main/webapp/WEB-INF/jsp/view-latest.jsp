@@ -9,15 +9,19 @@
         <table>
             <thead>
                 <tr>
-                    <th>Currency Code</th>
-                    <th>Currency Name</th>
+                    <th>Currency From</th>
+                    <th>Currency To</th>
+                    <th>Date</th>
+                    <th>Rate Of Exchange</th>
                 </tr>
             </thead>
             <tbody>
-                <c:forEach items="${symbolList}" var="symbolItem">
+                <c:forEach items="${latestList}" var="latestItem">
                     <tr>
-                        <td>${symbolItem.currencyCode}</td>
-                        <td>${symbolItem.currencyName}</td>
+                        <td>${latestItem.fromCurrency}</td>
+                        <td>${latestItem.toCurrency}</td>
+                        <td>${latestItem.date}</td>
+                        <td>${latestItem.rate}</td>
                     </tr>
                 </c:forEach>
             </tbody>
