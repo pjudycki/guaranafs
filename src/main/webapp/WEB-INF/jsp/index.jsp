@@ -36,6 +36,13 @@
                                <form action="./viewLatest"><input type="submit" value="Latest"/></form>
                            </td>
                        </tr>
+                      <tr>
+                          <td>Historical Rates of Exchange</td>
+                          <td>
+                          <br>
+                              <form action="./viewHistorical"><input type="submit" value="Historical"/></form>
+                          </td>
+                      </tr>
                    </tbody>
                </table>
     </body>

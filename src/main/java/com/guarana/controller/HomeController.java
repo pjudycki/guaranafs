@@ -29,4 +29,10 @@ public class HomeController {
         model.addAttribute("latestList", financialService.retrieveLatestAsCurrencyItem());
         return new ModelAndView("view-latest");
     }
+
+    @GetMapping("/viewHistorical")
+    public ModelAndView viewHistorical(Model model) {
+        model.addAttribute("historicalList", financialService.retrieveHistoricalAsCurrencyItem());
+        return new ModelAndView("view-historical");
+    }
 }

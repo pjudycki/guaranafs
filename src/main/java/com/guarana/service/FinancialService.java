@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -75,7 +76,17 @@ public class FinancialService {
     }
 
     public List<CurrencyItem> retrieveLatestAsCurrencyItem() {
-        CurrencyList currencyList = retrieve(API_HOST + "/latest?access_key=" + API_KEY, "EUR", null, CurrencyList.class);
+        CurrencyList currencyList = retrieveLatest(null, null);
+        return currencyList.getRates().entrySet()
+                .stream()
+                .map(item-> CurrencyItem.builder()
+                        .fromCurrency(currencyList.getBase())
+                        .toCurrency(item.getKey()).rate(item.getValue())
+                        .date(currencyList.getDate()).build()).collect(Collectors.toList());
+    }
+
+    public List<CurrencyItem> retrieveHistoricalAsCurrencyItem() {
+        CurrencyList currencyList = retrieveHistorical(null, null, LocalDate.now().minusDays(1).toString());
         return currencyList.getRates().entrySet()
                 .stream()
                 .map(item-> CurrencyItem.builder()

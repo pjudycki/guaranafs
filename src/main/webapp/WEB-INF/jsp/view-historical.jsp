@@ -2,7 +2,7 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <html>
 <head>
-<title>Latest Rates Of Exchange</title>
+<title>Historical Rates Of Exchange</title>
 <script src="https://code.jquery.com/jquery-3.7.0.js"
 	integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM="
 	crossorigin="anonymous"></script>
@@ -19,15 +19,19 @@
 	src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
 	integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
 	crossorigin="anonymous"></script>
+	<script src="http://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+	      <link href = "https://code.jquery.com/ui/1.13.2/themes/ui-lightness/jquery-ui.css"
+             rel = "stylesheet">
 <script type="text/javascript">
 	$(document).ready(function() {
-		$('#latest_table').DataTable();
+		$('#historical_table').DataTable();
+		$('#datepicker').datepicker();
 	});
 </script>
-
 </head>
 <body>
-	<table id="latest_table">
+    <p>Date: <input type="text" id="datepicker"></p>
+	<table id="historical_table">
 		<thead>
 			<tr>
 				<th>Currency From</th>
@@ -37,12 +41,12 @@
 			</tr>
 		</thead>
 		<tbody>
-			<c:forEach items="${latestList}" var="latestItem">
+			<c:forEach items="${historicalList}" var="historicalItem">
 				<tr>
-					<td>${latestItem.fromCurrency}</td>
-					<td>${latestItem.toCurrency}</td>
-					<td>${latestItem.date}</td>
-					<td>${latestItem.rate}</td>
+					<td>${historicalItem.fromCurrency}</td>
+					<td>${historicalItem.toCurrency}</td>
+					<td>${historicalItem.date}</td>
+					<td>${historicalItem.rate}</td>
 				</tr>
 			</c:forEach>
 		</tbody>
