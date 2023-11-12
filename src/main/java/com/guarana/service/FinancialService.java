@@ -3,8 +3,11 @@ package com.guarana.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guarana.configuration.GuaranaConfigurationProperties;
+import com.guarana.entity.SymbolEntity;
+import com.guarana.factory.SymbolFactory;
 import com.guarana.generator.ReportGenerator;
 import com.guarana.model.*;
+import com.guarana.repository.SymbolRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +19,8 @@ import org.springframework.web.client.RestTemplate;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,6 +40,9 @@ public class FinancialService {
 
     @Autowired
     private ReportGenerator reportGenerator;
+
+    @Autowired
+    private SymbolRepository symbolRepository;
 
     private String API_HOST;
     private String API_KEY;
@@ -156,6 +164,16 @@ public class FinancialService {
         return symbolList.getSymbols().entrySet().stream()
                 .map(s -> SymbolItem.builder().currencyCode(s.getKey()).currencyName(s.getValue()).build())
                 .collect(Collectors.toList());
+    }
+
+    public List<SymbolItem> getSymbolsDatabase() {
+        Iterable<SymbolEntity> iterable = symbolRepository.findAll();
+        Iterator<SymbolEntity> iter = iterable.iterator();
+        List<SymbolItem> list = new ArrayList<>();
+        while(iter.hasNext()) {
+            list.add(SymbolFactory.createSymbolItem(iter.next()));
+        }
+        return list;
     }
 
     public String generateHistoricalReport(String fileName, String base, String date) throws IOException {

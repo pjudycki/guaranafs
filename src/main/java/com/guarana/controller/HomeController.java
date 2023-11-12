@@ -20,7 +20,7 @@ public class HomeController {
 
     @GetMapping("/viewSymbols")
     public ModelAndView viewBooks(Model model) {
-        model.addAttribute("symbolList", financialService.getSymbols());
+        model.addAttribute("symbolList", financialService.getSymbolsDatabase());
         return new ModelAndView("view-symbols");
     }
 

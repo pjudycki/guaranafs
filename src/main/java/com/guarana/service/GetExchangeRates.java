@@ -4,21 +4,27 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.guarana.entity.CurrencyEntity;
 import com.guarana.entity.RetrievalEntity;
+import com.guarana.entity.SymbolEntity;
 import com.guarana.factory.CurrencyFactory;
 import com.guarana.factory.RetrievalFactory;
+import com.guarana.factory.SymbolFactory;
 import com.guarana.model.CurrencyList;
+import com.guarana.model.SymbolItem;
 import com.guarana.repository.CurrencyRepository;
 import com.guarana.repository.RetrievalRepository;
+import com.guarana.repository.SymbolRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
@@ -38,6 +44,9 @@ public class GetExchangeRates {
     @Autowired
     private RetrievalRepository retrievalRepository;
 
+    @Autowired
+    private SymbolRepository symbolRepository;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -52,6 +61,14 @@ public class GetExchangeRates {
         processAndSaveForCurrency(result);
         result = financialService.retrieveLatest("CHF", null);
         processAndSaveForCurrency(result);
+    }
+
+    //@PostConstruct
+    public void initializeSymbolsTable() {
+        List<SymbolItem> symbolItems = financialService.getSymbols();
+        List<SymbolEntity> symbols =
+                symbolItems.stream().map(SymbolFactory::createSymbolEntity).collect(Collectors.toList());
+        symbolRepository.saveAll(symbols);
     }
 
     //@PostConstruct
