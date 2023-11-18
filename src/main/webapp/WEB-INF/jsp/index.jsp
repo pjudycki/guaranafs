@@ -3,7 +3,12 @@
 <html>
     <head>
         <title>Guarana Financial Services</title>
-        <link href="<c:url value="/css/common.css"/>" rel="stylesheet" type="text/css">
+       <link href="<c:url value="/css/common.css"/>" rel="stylesheet" type="text/css">
+<script
+  src="https://code.jquery.com/jquery-3.7.1.min.js"
+  integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+  crossorigin="anonymous"></script>
+
         <style>
              body {
                 background-image: url("background.jpg");
@@ -11,39 +16,29 @@
                 background-repeat: no-repeat;
              }
         </style>
-    </head>
+        <script>
+        $(document).ready(function() {
+          $('#sidebar-btn').on('click', function() {
+            $('#sidebar').toggleClass('visible');
+          });
+        });
+        </script>
+       </head>
     <body>
-       <div align = "center" style="font-size:40px;"><b> Welcome to Guarana Financial Services </b></div>
-                <table>
-                   <thead>
-                       <tr>
-                           <th>Service Name</th>
-                           <th>Link</th>
-                       </tr>
-                   </thead>
-                   <tbody>
-                       <tr>
-                           <td>List of Available Symbols</td>
-                           <td>
-                           <br>
-                                <form action="./viewSymbols"><input type="submit" value="Symbols"/></form>
-                           </td>
-                       </tr>
-                       <tr>
-                           <td>Latest Rates of Exchange</td>
-                           <td>
-                           <br>
-                               <form action="./viewLatest"><input type="submit" value="Latest"/></form>
-                           </td>
-                       </tr>
-                      <tr>
-                          <td>Historical Rates of Exchange</td>
-                          <td>
-                          <br>
-                              <form action="./viewHistorical"><input type="submit" value="Historical"/></form>
-                          </td>
-                      </tr>
-                   </tbody>
-               </table>
+      <div id="sidebar">
+        <ul>
+          <li><a href="./viewSymbols">Symbols</a></li>
+          <li><a href="./viewLatest">Latest</a></li>
+        </ul>
+
+        <div id="sidebar-btn">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+      <div class="title">
+         <h1>Guarana Financial Services</h1>
+      </div>
     </body>
 </html>
