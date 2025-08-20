@@ -1,6 +1,6 @@
 package com.guarana.entity;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "symbol")

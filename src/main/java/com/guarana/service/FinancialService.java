@@ -12,11 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ public class FinancialService {
         }
 
         ResponseEntity<T> response = restTemplate.getForEntity(latestURL.toString(), clazz);
-        HttpStatus statusCode = response.getStatusCode();
+        HttpStatusCode statusCode = response.getStatusCode();
         HttpHeaders httpHeaders = response.getHeaders();
 
         logHttpHeadersAndStatus(httpHeaders, statusCode);
@@ -186,7 +187,7 @@ public class FinancialService {
         return reportGenerator.generateLatestReport(latest, fileName, base);
     }
 
-    private void logHttpHeadersAndStatus(HttpHeaders httpHeaders, HttpStatus statusCode) {
+    private void logHttpHeadersAndStatus(HttpHeaders httpHeaders, HttpStatusCode statusCode) {
 
         int statsCodeValue = statusCode.value();
 
